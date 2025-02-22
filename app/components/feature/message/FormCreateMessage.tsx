@@ -4,30 +4,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@radix-ui/react-label';
-import { Post } from './types';
-import { useMemo, useState } from 'react';
+import { Message } from './types';
+import { useState } from 'react';
+import { useWebSocket } from '@/context/WebSocketContext';
+import { toast, ToastContainer } from 'react-toastify';
+
+const messageInitialValue = {
+  title: '',
+  text: '',
+};
 
 export default function FormCreateMessage() {
-  const postInitialValue = {
-    title: '',
-    text: '',
-  };
-  const [postValue, setPostValue] = useState<Post>(postInitialValue);
+  const ws = useWebSocket();
+  const [messageValue, setMessageValue] = useState<Message>(messageInitialValue);
 
-  const socket = useMemo(() => {
-    const ws = new WebSocket('ws://localhost:8080/');
-    ws.onopen = () => {};
-    return ws;
-  }, []);
-
-  const onSetPostValue = (value: string, type: string) => {
-    setPostValue((post) => ({ ...post, [type]: value }));
+  const onSetMessageValue = (value: string, type: string) => {
+    setMessageValue((message) => ({ ...message, [type]: value }));
   };
 
   const onSubmit = () => {
-    if (!postValue.title || !postValue.text) return
-    socket.send(JSON.stringify(postValue));
-    setPostValue(postInitialValue);
+    if (!messageValue.title || !messageValue.text) {
+      toast.error("Please fill in all fields");
+      return
+    };
+
+    ws.send(JSON.stringify(messageValue));
+    setMessageValue(messageInitialValue);
   };
 
   return (
@@ -35,8 +37,8 @@ export default function FormCreateMessage() {
       <div className='w-full'>
         <Label>Title</Label>
         <Input
-          value={postValue.title}
-          onChange={(e) => onSetPostValue(e.target.value, 'title')}
+          value={messageValue.title}
+          onChange={(e) => onSetMessageValue(e.target.value, 'title')}
         />
       </div>
 
@@ -44,14 +46,16 @@ export default function FormCreateMessage() {
         <Label>Text</Label>
 
         <Textarea
-          value={postValue.text}
-          onChange={(e) => onSetPostValue(e.target.value, 'text')}
+          value={messageValue.text}
+          onChange={(e) => onSetMessageValue(e.target.value, 'text')}
         />
       </div>
 
       <Button className='self-end' onClick={() => onSubmit()}>
         Send
       </Button>
+
+      <ToastContainer />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export type Post = {
+export type Message = {
   title: string;
   text: string;
 } 
