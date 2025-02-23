@@ -4,13 +4,11 @@ import mongoose from 'mongoose';
 import 'dotenv/config'
 
 const wss = new WebSocketServer({ port: 8080 });
+
 try {
   await mongoose.connect(process.env.DATABASE_URL);
-  await mongoose.connection.db.admin().command({ ping: 1 });
 } catch (e) {
   console.error(e);
-} finally {
-  console.log('connected');
 }
 wss.on('connection', async (ws) => {
   const messagesList = await MessageController.listMessage();
