@@ -3,7 +3,7 @@ import { MessageController } from './controllers/MessageController.js';
 import mongoose from 'mongoose';
 import 'dotenv/config'
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 3000 });
 
 try {
   await mongoose.connect(process.env.DATABASE_URL);
